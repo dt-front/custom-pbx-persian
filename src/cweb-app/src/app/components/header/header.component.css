@@ -1,0 +1,41 @@
+/*
+.header {
+  margin-bottom: 10px;
+  box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12);
+}
+*/
+.example-spacer {
+  flex: 1 1 auto;
+}
+
+.user-name {
+  font-size: 14px;
+}
+.flex-v-center {
+  display: flex;
+  align-items: center;
+}
+
+.avatar-img {
+  display: inline-block;
+  height: 30px;
+  width: 30px;
+  border-radius: 45px;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

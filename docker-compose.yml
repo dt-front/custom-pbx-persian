@@ -1,0 +1,77 @@
+volumes:
+  freeswitch-recordings:
+  fsdata:
+    driver_opts:
+      type: none
+      o: bind
+      device: docker/fsdata
+  cdata:
+    driver_opts:
+      type: none
+      o: bind
+      device: docker/cdata
+
+services:
+  postgres:
+    container_name: postgres-host
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: custompbx
+      POSTGRES_PASSWORD: custompbx
+      POSTGRES_DB: custompbx
+    ports:
+      - 5432:5432
+    volumes:
+      - /var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - local_network
+
+  freeswitch:
+    container_name: freeswitch-host
+    hostname: docker-fs
+    image: ghcr.io/custompbx/freeswitch:v0.0.107c
+    depends_on:
+      custompbx:
+        #condition: service_healthy
+        condition: service_started
+    restart: always
+    ports:
+      - 5060:5060/tcp
+      - 5060:5060/udp
+      - 5080:5080/tcp
+      - 7443:7443/tcp
+      - 8021:8021/tcp
+      - 16384-16399:16384-16399/udp
+    volumes:
+      - /var/log/freeswitch/log
+      - /usr/local/freeswitch/db
+      - freeswitch-recordings:/var/lib/freeswitch/recordings
+    networks:
+      - local_network
+
+  custompbx:
+    container_name: custompbx-host
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_started
+    restart: always
+    ports:
+      - 8080:8080
+      - 8081:8081
+      - 8082:8082
+      - 3478:3478
+    volumes:
+      - /app
+      - ./docker/config.json:/app/config.json
+      - freeswitch-recordings:/app/recordings
+    networks:
+      - local_network
+
+networks:
+  local_network:
+    name: local_network

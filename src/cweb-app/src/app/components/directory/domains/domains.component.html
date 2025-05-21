@@ -1,0 +1,129 @@
+<app-inner-header name="دامنه‌ها" [loadCounter]="loadCounter"></app-inner-header>
+<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" [(selectedIndex)]="selectedIndex">
+
+  <mat-tab label="لیست">
+    <mat-card *ngIf="loadCounter === 0 && !onlyValues(list)?.length">
+      <mat-card-content>
+        هنوز دامنه‌ای وجود ندارد. می‌توانید ایجاد کنید یا از تنظیمات موجود وارد کنید.
+        <button mat-raised-button color="basic" class="but-spacer-left switch-button"
+                (click)="importDirectory()">
+          وارد کردن
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card *ngIf="onlyValues(list)?.length">
+      <mat-card-header>
+        <mat-card-subtitle>دامنه‌ها</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngFor="let domain of onlyValues(list); trackBy: trackByFnId;">
+          <mat-expansion-panel (opened)="getDetails(domain.id)" (closed)="clearDetails(domain.id)">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{domain.name}}
+              </mat-panel-title>
+              <mat-panel-description>
+                برای دیدن جزئیات کلیک کنید
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <button mat-raised-button color="basic" (click)="copy(domain.id)"
+                    *ngIf="listDetails[domain.id] && (listDetails[domain.id].parameters || listDetails[domain.id].variables)">
+              کپی
+            </button>
+
+            <h3>پارامترها:</h3>
+            <div>
+              <app-key-value-pad [exist]="listDetails[domain.id]"
+                                 [items]="listDetails[domain.id]?.parameters"
+                                 [newItems]="listDetails[domain.id]?.parameters?.new"
+                                 [id]="domain.id"
+                                 [toCopy]="toCopy"
+                                 [store]="store"
+                                 [dispatchers]="domainParamDispatchers">
+              </app-key-value-pad>
+            </div>
+
+            <h3>متغیرها:</h3>
+            <div>
+              <app-key-value-pad [exist]="listDetails[domain.id]"
+                                 [items]="listDetails[domain.id]?.variables"
+                                 [newItems]="listDetails[domain.id]?.variables?.new"
+                                 [id]="domain.id"
+                                 [toCopy]="toCopy"
+                                 [store]="store"
+                                 [dispatchers]="domainVarDispatchers">
+              </app-key-value-pad>
+            </div>
+          </mat-expansion-panel>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </mat-tab>
+
+  <mat-tab label="افزودن">
+    <form class="spacer filter-container" (ngSubmit)="onDomainSubmit()">
+      <mat-form-field hideRequiredMarker>
+        <mat-label>نام</mat-label>
+        <input matInput placeholder="نام دامنه جدید" required name="name" [(ngModel)]="newDomainName">
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit">ارسال</button>
+    </form>
+    <mat-card>
+      <mat-card-content>
+        <button mat-raised-button color="basic" class="but-spacer-left switch-button spacer-bottom"
+                [disabled]="!XMLBody"
+                (click)="ImportXMLDomain()">
+          وارد کردن
+        </button>
+        <mat-expansion-panel (opened)="initEditor()">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              ویرایشگر XML
+            </mat-panel-title>
+            <mat-panel-description>
+              برای دیدن جزئیات کلیک کنید
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+          <app-code-editor [(content)]="XMLBody" *ngIf="editorInited"></app-code-editor>
+        </mat-expansion-panel>
+      </mat-card-content>
+    </mat-card>
+  </mat-tab>
+
+  <mat-tab label="حذف/تغییر نام">
+    <form class="spacer filter-container" #deleteForm="ngForm">
+      <div *ngFor="let domain of onlyValues(list); trackBy: trackByFnId;">
+        <mat-form-field hideRequiredMarker>
+          <input matInput placeholder="نام دامنه" required [ngModel]="domain.name"
+                 [name]="'domain::' + domain.id">
+        </mat-form-field>
+
+        <button mat-button color="accent" [disabled]="checkDirty(deleteForm.controls['domain::' + domain.id])"
+                class="but-spacer-left"
+                (click)="openBottomSheet(domain.id, deleteForm.controls['domain::' + domain.id].value, domain.name, 'rename')">
+          به‌روزرسانی
+        </button>
+
+        <button *ngIf="domain.enabled" mat-raised-button color="accent"
+                class="but-spacer-left switch-button"
+                (click)="switchDomain(domain)">
+          غیرفعال کردن
+        </button>
+
+        <button *ngIf="!domain.enabled" mat-raised-button color="primary"
+                class="but-spacer-left switch-button"
+                (click)="switchDomain(domain)">
+          فعال کردن
+        </button>
+
+        <button mat-raised-button color="warn" class="but-spacer-left"
+                (click)="openBottomSheet(domain.id, deleteForm.controls['domain::' + domain.id].value, domain.name, 'delete')">
+          حذف
+        </button>
+      </div>
+    </form>
+  </mat-tab>
+
+</mat-tab-group>

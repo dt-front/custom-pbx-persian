@@ -1,0 +1,108 @@
+<app-inner-header name="گروه‌ها" [loadCounter]="loadCounter"></app-inner-header>
+<mat-card *ngIf="loadCounter === 0 && !(list | keyvalue)?.length">
+  <mat-card-content>
+    هنوز هیچ دامینی وجود ندارد. می‌توانید یکی ایجاد کنید یا از صفحه دامنه‌ها از تنظیمات موجود وارد کنید.
+    <button mat-raised-button color="basic" class="but-spacer-left switch-button"
+            routerLink="/directory/domains">
+      رفتن به دامنه‌ها
+    </button>
+  </mat-card-content>
+</mat-card>
+
+<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" [(selectedIndex)]="selectedIndex" *ngIf="(list | keyvalue)?.length">
+  <mat-tab label="لیست">
+    <div *ngFor="let domain of list | keyvalue">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-subtitle>دامین: <b>{{domain.value.name}}</b></mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-expansion-panel (opened)="getDetails(group.id)" (closed)="clearDetails(group.id)"
+                               *ngFor="let group of onlyValuesByParent(groupList, domain.key)">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{group.name}}
+              </mat-panel-title>
+              <mat-panel-description>
+                برای دریافت جزئیات کلیک کنید
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <button mat-raised-button class="add-button example-list" color="accent"
+                    (click)="manageGroup[group.id]=!manageGroup[group.id]">مدیریت
+            </button>
+
+            <div class="example-list users-to-del">
+              <mat-card class="float-card example-box"
+                        *ngFor="let gUser of onlyValuesByParent(listGroupUsers, group.id)">
+                <button mat-flat-button color="warn" class="action" (click)="delUser(gUser.id)" *ngIf="manageGroup[group.id]">حذف</button>
+                <mat-card-actions class="vert-centered">
+                  <mat-icon class="icon-spacer">face</mat-icon>
+                  <span class="user-name">{{listDomainUsers[gUser.user?.id]?.name}}</span>
+                </mat-card-actions>
+              </mat-card>
+            </div>
+
+            <div class="users-to-add example-list">
+              <ng-container *ngFor="let user of onlyValuesByParent(listDomainUsers, domain.key)">
+                <div *ngIf="bound[group.id] && !bound[group.id][user.id] && manageGroup[group.id]">
+                  <mat-card class="float-card example-box">
+                    <button mat-flat-button color="primary" class="action" (click)="addUser(user.id, group.id)">افزودن</button>
+                    <mat-card-actions class="vert-centered">
+                      <mat-icon class="icon-spacer">face</mat-icon>
+                      <span class="user-name">{{user.name}}</span>
+                    </mat-card-actions>
+                  </mat-card>
+                </div>
+              </ng-container>
+            </div>
+
+          </mat-expansion-panel>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="افزودن">
+    <form class="spacer spacerb filter-container" (ngSubmit)="onGroupSubmit()">
+      <mat-form-field hideRequiredMarker>
+        <mat-label>دامین</mat-label>
+        <mat-select required name="domainId" [(ngModel)]="domainId" disableOptionCentering>
+          <mat-option>--</mat-option>
+          <mat-option *ngFor="let domain of list | keyvalue" [value]="domain.key">{{domain.value.name}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field hideRequiredMarker>
+        <mat-label>نام</mat-label>
+        <input matInput placeholder="نام گروه جدید" required name="name" [(ngModel)]="newGroupName">
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit">ارسال</button>
+    </form>
+  </mat-tab>
+
+  <mat-tab label="حذف/تغییر نام">
+    <form class="spacer spacerb filter-container" #deleteForm="ngForm">
+      <mat-form-field hideRequiredMarker>
+        <mat-label>دامین</mat-label>
+        <mat-select required name="domainId" [(ngModel)]="domainId" disableOptionCentering>
+          <mat-option>--</mat-option>
+          <mat-option *ngFor="let domain of list | keyvalue" [value]="domain.key">{{domain.value.name}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div *ngFor="let group of onlyValuesByParent(groupList, domainId)">
+        <mat-form-field hideRequiredMarker>
+          <mat-label>نام گروه</mat-label>
+          <input matInput name="group name" required [ngModel]="group.name" [name]="'group::' + group.id">
+        </mat-form-field>
+        <button mat-button color="accent" [disabled]="checkDirty(deleteForm.controls['group::' + group.id])"
+                (click)="openBottomSheet(group.id, deleteForm.controls['group::' + group.id].value, group, 'rename')">
+          بروزرسانی
+        </button>
+        <button mat-raised-button color="warn"
+                (click)="openBottomSheet(group.id, deleteForm.controls['group::' + group.id].value, group, 'delete')">
+          حذف
+        </button>
+      </div>
+    </form>
+  </mat-tab>
+</mat-tab-group>

@@ -1,0 +1,26 @@
+.sidenav-container {
+  width: 100%;
+  min-height: calc(100vh - 64px);
+  position: absolute;
+  background: #ffffff;
+}
+
+.mat-drawer-content {
+  position: unset;
+  z-index: 1;
+  display: block;
+  height: 100%;
+  overflow: auto;
+}
+
+mat-sidenav {
+  width: 240px;
+}
+.menu-sidenav {
+  margin: 0 12px;
+}
+/*
+.cdk-overlay-container {
+  position: unset;
+}
+*/

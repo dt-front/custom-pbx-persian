@@ -1,0 +1,137 @@
+<app-inner-header name="ماژول‌ها" [loadCounter]="loadCounter"></app-inner-header>
+<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+  <mat-tab label="فهرست">
+    <mat-card>
+      <mat-card-content>
+        <article>
+          <div class="sections" *ngFor="let module of list | keyvalue; trackBy: trackByFn;">
+            <div class="section" *ngIf="isModuleConf(module.value)">
+              <section class="mat-subheading-1">
+                <button mat-raised-button color="basic" class="but-spacer-left name-button"
+                        [routerLink]="['/configuration/' + escapeModuleName(module.key)]">
+                  {{module.key}}
+                </button>
+              </section>
+              <section>
+                <button mat-raised-button color="basic" class="but-spacer-left switch-button"
+                        [disabled]="!module.value || !module.value.id || !module.value.loaded"
+                        (click)="reloadModule(module.value.id)">
+                  بارگذاری مجدد
+                </button>
+              </section>
+              <section *ngIf="module.value && module.value.loaded">
+                <button mat-raised-button color="warn" class="but-spacer-left switch-button"
+                        [disabled]="!module.value || !module.value.id || module.value.unloadable"
+                        (click)="unloadModule(module.value.id)">
+                  غیرفعال‌سازی
+                </button>
+              </section>
+              <section *ngIf="!module.value || !module.value.loaded">
+                <button mat-raised-button color="basic" class="but-spacer-left switch-button"
+                        [disabled]="!module.value || !module.value.id || module.value.unloadable"
+                        (click)="loadModule(module.value.id)">
+                  فعال‌سازی
+                </button>
+              </section>
+              <section *ngIf="!module.value || !module.value.id">
+                <button mat-raised-button color="primary" class="but-spacer-left switch-button" disabled>فعال‌سازی</button>
+              </section>
+              <section *ngIf="module.value && module.value.id && !module.value.enabled">
+                <button mat-raised-button color="primary" class="but-spacer-left switch-button"
+                        (click)="switchModule(module.value.id, module.value.enabled)">
+                  فعال‌سازی
+                </button>
+              </section>
+              <section *ngIf="module.value && module.value.id && module.value.enabled">
+                <button mat-raised-button color="accent" class="but-spacer-left switch-button"
+                        (click)="switchModule(module.value.id, module.value.enabled)">
+                  غیرفعال‌سازی
+                </button>
+              </section>
+              <section>
+                <button mat-raised-button color="basic" class="but-spacer-left switch-button"
+                        [disabled]="module.value && module.value.id" (click)="createConfigModule(module.key)">
+                  ساخت از ابتدا
+                </button>
+                یا
+                <button mat-raised-button color="basic" class="but-spacer-left switch-button"
+                        [disabled]="module.value && module.value.id" (click)="importConfigModule(module.key)">
+                  وارد کردن از فایل‌سیستم
+                </button>
+              </section>
+              <section>
+                <button *ngIf="autoload['mod_'+module.key] && autoload['mod_'+module.key].enabled"
+                        mat-raised-button color="primary" class="but-spacer-left switch-button"
+                        (click)="autoLoadModule(module.value.id)"
+                        [disabled]="!(module.value && module.value.id)">
+                  بارگذاری خودکار
+                </button>
+                <button *ngIf="!autoload['mod_'+module.key] || !autoload['mod_'+module.key].enabled"
+                        mat-raised-button color="basic" class="but-spacer-left switch-button"
+                        (click)="autoLoadModule(module.value.id)"
+                        [disabled]="!(module.value && module.value.id)">
+                  بارگذاری خودکار
+                </button>
+              </section>
+            </div>
+          </div>
+          <div class="total">
+            <button mat-raised-button color="primary" class="but-spacer-left switch-button"
+                    (click)="importConfigAllModules()">
+              وارد کردن تنظیمات همه ماژول‌های ممکن از فایل‌سیستم
+            </button>
+          </div>
+        </article>
+      </mat-card-content>
+    </mat-card>
+  </mat-tab>
+
+
+  <mat-tab label="وارد کردن از XML">
+  <mat-card>
+    <mat-card-content>
+      <button mat-raised-button color="basic" class="but-spacer-left switch-button"
+              [disabled]="!XMLBody"
+              (click)="ImportXMLModuleConfig()"
+      >
+        وارد کردن
+      </button>
+      <mat-expansion-panel (opened)="initEditor()">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            ویرایشگر XML
+          </mat-panel-title>
+          <mat-panel-description>
+            برای مشاهده جزئیات کلیک کنید
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <app-code-editor [(content)]="XMLBody" *ngIf="editorInited"></app-code-editor>
+      </mat-expansion-panel>
+    </mat-card-content>
+  </mat-card>
+</mat-tab>
+
+  <mat-tab label="پاک‌سازی">
+  <mat-card>
+    <mat-card-content>
+      <article>
+        <div class="sections" *ngFor="let module of list | keyvalue; trackBy: trackByFn;">
+          <div class="section" *ngIf="isModuleConf(module.value)">
+            <section class="mat-subheading-1">
+              {{module.key}}
+            </section>
+            <section>
+              <button mat-raised-button color="warn" class="but-spacer-left switch-button"
+                      [disabled]="!module.value || !module.value.id"
+                      (click)="openBottomSheetModule(module.value.id, module.key, 'delete')">
+                پاک‌سازی
+              </button>
+            </section>
+          </div>
+        </div>
+      </article>
+    </mat-card-content>
+  </mat-card>
+</mat-tab>
+
+</mat-tab-group>

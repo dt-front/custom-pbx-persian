@@ -1,0 +1,84 @@
+<!--section class="main-content-wrapper" cdkDrag cdkDragBoundary="body"-->
+<section class="main-content-wrapper" cdkDrag>
+  <mat-toolbar [color]="headerColor()" role="heading" class="header" cdkDragHandle>
+    تلفن
+    <span class="example-spacer"></span>
+    <mat-icon *ngIf="!data.UA?.transport.isConnected() && !isVeroLogged()" color="warn">wifi_off</mat-icon>
+    <button *ngIf="data.UA?.transport.isConnected() || isVeroLogged()" class="reg-button" mat-mini-fab 
+      [color]="!data.registered && libName === sipjsLib ? 'warn' : 'green'" 
+      [title]="!data.registered && libName === sipjsLib ? 'ورود به تماس‌ها' : 'خروج از تماس‌ها'" 
+      aria-label="register" (click)="register()" [disabled]="!data.UA?.transport.isConnected()">
+      <mat-icon *ngIf="!data.registered && libName === sipjsLib">phone_callback</mat-icon>
+      <mat-icon *ngIf="data.registered && libName === sipjsLib">phone_disabled</mat-icon>
+    </button>
+    <button mat-icon-button (click)="restartUS()" title="راه‌اندازی مجدد تلفن">
+      <mat-icon>autorenew</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <section id="main-content" class="animated fadeInUp" *ngIf="data.uaParams.authorizationUsername">
+    <mat-form-field class="number-field">
+      <mat-label>شماره</mat-label>
+      <input matInput [(ngModel)]="data.number" name="number">
+      <button mat-icon-button matSuffix *ngIf="data.number" aria-label="حذف" (click)="removeLastDigit()" class="dialpad-button-remove">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button mat-icon-button matSuffix (click)="switchHideButtonsPad()" title="صفحه شماره‌گیر" aria-label="صفحه شماره‌گیر">
+        <mat-icon>dialpad</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <h3 class="timer mat-headline-3">{{data.totalTime | formatTimer}}</h3>
+
+    <div class="buttons-pad" *ngIf="showButtonsPad">
+      <button (click)="phoneButton(but)" class="phone-digit-button" *ngFor="let but of padButtons">{{ but }}</button>
+    </div>
+
+    <div class="actions-buttons-pad">
+      <button mat-flat-button (click)="call()" *ngIf="!(data.inCall || data.ringing || data.answered)"
+              color="primary" title="تماس"
+              class="phone-action-button"
+              [disabled]="(!data.UA?.transport.isConnected() && !isVeroLogged()) || !data.number"
+      >
+        <mat-icon>phone</mat-icon><span>تماس</span>
+      </button>
+
+      <button mat-flat-button (click)="answer()" *ngIf="data.ringing"
+              color="green" title="پاسخ دادن" class="phone-action-button"
+              [disabled]="!data.UA?.transport.isConnected() && !isVeroLogged()"
+      >
+        <span>پاسخ: </span><span style="font-size: 20px">{{ data.session?.request?.from?.uri?.user }}</span>
+      </button>
+
+      <button mat-flat-button (click)="hangup()" *ngIf="data.inCall || data.ringing || data.answered"
+              color="warn" class="phone-action-button"
+              [disabled]="!data.UA?.transport.isConnected() && !isVeroLogged()"
+      >
+        <mat-icon>call_end</mat-icon><span>قطع تماس</span>
+      </button>
+
+      <button mat-flat-button (click)="hold()" *ngIf="data.answered && !data.onHold"
+              title="نگه داشتن تماس" class="phone-action-button mat-blue"
+              [disabled]="!data.UA?.transport.isConnected() && !isVeroLogged()"
+      >
+        <mat-icon>phone_paused</mat-icon><span>نگه داشتن</span>
+      </button>
+
+      <button mat-flat-button (click)="unhold()" *ngIf="data.answered && data.onHold"
+              title="برداشتن نگه داشتن" class="phone-action-button mat-blue"
+              [disabled]="!data.UA?.transport.isConnected() && !isVeroLogged()"
+      >
+        <mat-icon>play_arrow</mat-icon><span>ادامه تماس</span>
+      </button>
+    </div>
+  </section>
+
+  <section *ngIf="!data.uaParams.authorizationUsername">
+    <mat-toolbar color="warn" role="heading" class="header">بدون اطلاعات ورود</mat-toolbar>
+  </section>
+
+  <div id="mediaTags" #mediaTags>
+    <audio id="remoteTag" autoplay #remoteTag></audio>
+    <audio id="localTag" muted="muted" #localTag></audio>
+  </div>
+</section>

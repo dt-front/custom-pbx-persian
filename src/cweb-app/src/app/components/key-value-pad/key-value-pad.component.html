@@ -1,0 +1,82 @@
+<form *ngIf="exist" #form="ngForm">
+  <div class="spacer" *ngFor="let item of onlyValues(items); trackBy: trackByFnId;">
+    <div *ngIf="item.id && !isArray(item)">
+      <mat-form-field hideRequiredMarker>
+        <mat-label>نام</mat-label>
+        <input matInput placeholder="نام" [ngModel]="item.name" required
+               [disabled]="!item.enabled"
+               [name]="'itemName' + item.id"
+               appResizeInput
+               [resizeOnString]="item.name"
+        >
+      </mat-form-field>
+      <mat-form-field hideRequiredMarker>
+        <mat-label>مقدار</mat-label>
+        <input matInput placeholder="مقدار" [ngModel]="item.value" required
+               [disabled]="!item.enabled"
+               [name]="'itemValue' + item.id"
+               appResizeInput
+               [resizeOnString]="item.value"
+        >
+      </mat-form-field>
+      <button mat-button color="accent" class="but-spacer-left"
+              [disabled]="!isReadyToSend(form.controls['itemName' + item.id], form.controls['itemValue' + item.id])"
+              (click)="updateItem(item.id, form.controls['itemName' + item.id].value, form.controls['itemValue' + item.id].value); form.controls['itemName' + item.id].markAsPristine(); form.controls['itemValue' + item.id].markAsPristine();">
+        بروزرسانی
+      </button>
+      <button *ngIf="item.enabled" mat-raised-button color="accent"
+              class="but-spacer-left switch-button"
+              (click)="switchItem(item)">
+        غیرفعال‌سازی
+      </button>
+      <button *ngIf="!item.enabled" mat-raised-button color="primary"
+              class="but-spacer-left switch-button"
+              (click)="switchItem(item)">
+        فعال‌سازی
+      </button>
+      <button mat-raised-button color="warn" class="but-spacer-left"
+              (click)="deleteItem(item.id)">
+        حذف
+      </button>
+    </div>
+  </div>
+  <div *ngIf="items">
+    <div class="spacer" *ngFor="let item of newItems; let i = index">
+      <div *ngIf="item">
+        <mat-form-field hideRequiredMarker>
+          <mat-label>نام</mat-label>
+          <input matInput placeholder="نام" [ngModel]="item.name" required
+                 [name]="'newItemName' + i"
+                 appResizeInput
+                 [resizeOnString]="item.name"
+          >
+        </mat-form-field>
+        <mat-form-field hideRequiredMarker>
+          <mat-label>مقدار</mat-label>
+          <input matInput placeholder="مقدار" [ngModel]="item.value" required
+                 [name]="'newItemValue' + i"
+                 appResizeInput
+                 [resizeOnString]="item.value"
+          >
+        </mat-form-field>
+        <button mat-button color="accent" class="but-spacer-left"
+                [disabled]="!isNewReadyToSend(form.controls['newItemName' + i], form.controls['newItemValue' + i])"
+                (click)="newItem(i, form.controls['newItemName' + i].value, form.controls['newItemValue' + i].value)">
+          افزودن
+        </button>
+        <button mat-button color="warn" class="but-spacer-left"
+                (click)="dropNewItem(i)">
+          حذف
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+
+<button mat-raised-button color="accent" class="spacer" (click)="addItemField()">
+  افزودن آیتم جدید
+</button>
+<button mat-raised-button color="primary" class="but-spacer-left" (click)="pasteItems()"
+        *ngIf="toCopy && toCopy !== id">
+  چسباندن
+</button>

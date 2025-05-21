@@ -1,0 +1,266 @@
+<app-inner-header name="کاربران" [loadCounter]="loadCounter"></app-inner-header>
+<mat-card *ngIf="loadCounter === 0 && !onlyValues(list)?.length">
+  <mat-card-content>
+    هنوز هیچ دامنه‌ای تعریف نشده است. می‌توانید ایجاد کنید یا از صفحه دامنه‌ها از تنظیمات موجود وارد کنید.
+    <button mat-raised-button color="basic" class="but-spacer-left switch-button"
+            routerLink="/directory/domains">
+      رفتن به صفحه دامنه‌ها
+    </button>
+  </mat-card-content>
+</mat-card>
+
+ <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" [(selectedIndex)]="selectedIndex" *ngIf="onlyValues(list)?.length">
+<mat-tab label="لیست">
+  <div class="filter-container" *ngIf="list && objectLenght(list) > 1">
+    <mat-form-field hideRequiredMarker>
+      <mat-label>دامنه</mat-label>
+      <mat-select required [(ngModel)]="domainIds" multiple disableOptionCentering>
+        <mat-option *ngFor="let domain of onlyValues(list)" [value]="domain.id">{{domain.name}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  <div *ngFor="let domain of onlyValues(domainFilter()); trackBy: trackByFnId;">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-subtitle>دامنه: <b>{{domain.name}}</b></mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-expansion-panel (opened)="getDetails(user.id)" (closed)="clearDetails(user.id)"
+                             *ngFor="let user of onlyValuesByParent(userList, domain.id); trackBy: trackByFnId;">
+          <mat-expansion-panel-header>
+            <mat-panel-title class="vert-centered">
+              <mat-icon class="icon-spacer">face</mat-icon>
+              <span>{{user.name}}</span>
+            </mat-panel-title>
+            <mat-panel-description>
+              کلیک کنید تا جزئیات نمایش داده شود
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+          <form #details="ngForm">
+            <div>
+              <button mat-raised-button color="basic" (click)="copy(user.id)"
+                      *ngIf="user.parameters || user.variables">
+                کپی
+              </button>
+            </div>
+            <div class="user-attribute">
+              <h3>کش:</h3>
+              <div class="spacer">
+                <mat-form-field hideRequiredMarker>
+                  <mat-label>کش</mat-label>
+                  <input matInput placeholder="کش" [ngModel]="user.cache" required
+                         [name]="'cache' + user.id">
+                </mat-form-field>
+                <button mat-button color="accent"
+                        [disabled]="!isvalueReadyToSend(details.controls['cache' + user.id])"
+                        (click)="updateCache(user.id, details.controls['cache' + user.id])">
+                  به‌روزرسانی
+                </button>
+              </div>
+            </div>
+            <div class="user-attributes">
+              <h3>نام مستعار شماره:</h3>
+              <div class="spacer">
+                <mat-form-field hideRequiredMarker>
+                  <mat-label>نام مستعار شماره</mat-label>
+                  <input matInput placeholder="نام مستعار شماره" [ngModel]="user.number_alias"
+                         [name]="'number_alias' + user.id">
+                </mat-form-field>
+                <button mat-button color="accent"
+                        [disabled]="!isvalueReadyToSend(details.controls['number_alias' + user.id])"
+                        (click)="updateNumberAlias(user.id, details.controls['number_alias' + user.id])">
+                  به‌روزرسانی
+                </button>
+              </div>
+            </div>
+            <div class="user-attributes">
+              <h3>سیدر (Cidr):</h3>
+              <div class="spacer">
+                <mat-form-field hideRequiredMarker>
+                  <mat-label>سیدر</mat-label>
+                  <input matInput placeholder="سیدر" [ngModel]="user.cidr"
+                         [name]="'cidr' + user.id">
+                </mat-form-field>
+                <button mat-button color="accent"
+                        [disabled]="!isvalueReadyToSend(details.controls['cidr' + user.id])"
+                        (click)="updateCidr(user.id, details.controls['cidr' + user.id])">
+                  به‌روزرسانی
+                </button>
+              </div>
+            </div>
+          </form>
+          <h3>پارامترها:</h3>
+          <div *ngIf="user">
+            <app-key-value-pad [exist]="user"
+                               [items]="user.parameters"
+                               [newItems]="user.parameters?.new"
+                               [id]="user.id"
+                               [toCopy]="toCopy"
+                               [store]="store"
+                               [dispatchers]="userParamDispatchers">
+            </app-key-value-pad>
+          </div>
+          <h3>متغیرها:</h3>
+          <div *ngIf="user">
+            <app-key-value-pad [exist]="user"
+                               [items]="user.variables"
+                               [newItems]="user.variables?.new"
+                               [id]="user.id"
+                               [toCopy]="toCopy"
+                               [store]="store"
+                               [dispatchers]="userVarDispatchers">
+            </app-key-value-pad>
+          </div>
+        </mat-expansion-panel>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</mat-tab>
+
+
+  <mat-tab label="افزودن">
+  <form class="spacer filter-container" (ngSubmit)="onUserSubmit()">
+    <mat-form-field hideRequiredMarker>
+      <mat-label>دامنه</mat-label>
+      <mat-select required name="domainId" [(ngModel)]="domainId" disableOptionCentering>
+        <mat-option>--</mat-option>
+        <mat-option *ngFor="let domain of onlyValues(list)" [value]="domain.id">{{domain.name}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field hideRequiredMarker>
+      <mat-label>نام</mat-label>
+      <input matInput placeholder="نام کاربر جدید" required name="name" [(ngModel)]="newUserName">
+    </mat-form-field>
+    <mat-form-field hideRequiredMarker>
+      <mat-label>تعداد</mat-label>
+      <input matInput type="number" max="100" placeholder="تعداد" required name="bulk" [(ngModel)]="bulkUsers">
+    </mat-form-field>
+    <button mat-raised-button color="primary" type="submit">ارسال</button>
+  </form>
+  <mat-card>
+    <mat-card-content>
+      <button mat-raised-button color="basic" class="but-spacer-left switch-button spacer-bottom"
+              [disabled]="!XMLBody || !domainId"
+              (click)="ImportXMLUser()"
+      >
+        واردکردن
+      </button>
+      <mat-expansion-panel (opened)="initEditor()">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            ویرایشگر XML
+          </mat-panel-title>
+          <mat-panel-description>
+            برای مشاهده جزئیات کلیک کنید
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+        <app-code-editor [(content)]="XMLBody" *ngIf="editorInited"></app-code-editor>
+      </mat-expansion-panel>
+      <mat-expansion-panel (opened)="GetWebDirectoryUsersTemplatesList()">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            قالب‌های کاربر
+          </mat-panel-title>
+          <mat-panel-description>
+            برای مشاهده جزئیات کلیک کنید
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <mat-card>
+          <mat-expansion-panel *ngFor="let template of onlyValues(usersTemplates); trackBy: trackById;"
+                               class="tabbed-panel"
+                               (opened)="GetWebDirectoryUsersTemplateForm(template.id)">
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{template.name}}</mat-panel-title>
+              <mat-panel-description>
+                برای مشاهده جزئیات کلیک کنید
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <form class="spacer">
+              <div *ngIf="templatesItems[template.id]">
+                <mat-form-field hideRequiredMarker>
+                  <mat-label>نام کاربری</mat-label>
+                  <input matInput
+                         placeholder="شماره/نام کاربری"
+                         [(ngModel)]="templatesItems[template.id].name"
+                         name="userName"
+                  >
+                </mat-form-field>
+                <div *ngFor="let parameter of templatesItems[template.id].parameters; trackBy: trackById;">
+                  <mat-form-field hideRequiredMarker>
+                    <input matInput
+                           [placeholder]="parameter.name"
+                           [(ngModel)]="parameter.value"
+                           [name]="parameter.name"
+                           [disabled]="parameter.disabled || !parameter.editable"
+                    >
+                  </mat-form-field>
+                  <mat-card class="description">{{parameter.description}}</mat-card>
+                </div>
+                <div *ngFor="let variable of templatesItems[template.id].variables; trackBy: trackById;">
+                  <mat-form-field hideRequiredMarker>
+                    <input matInput
+                           [placeholder]="variable.name"
+                           [(ngModel)]="variable.value"
+                           [name]="variable.name"
+                           [disabled]="variable.disabled || !variable.editable"
+                    >
+                  </mat-form-field>
+                  <mat-card class="description" *ngIf="variable.description">{{variable.description}}</mat-card>
+                </div>
+              </div>
+
+              <button mat-raised-button color="primary" type="submit"
+                      (click)="onTemplateUserSubmit(templatesItems[template.id])">ارسال
+              </button>
+            </form>
+
+          </mat-expansion-panel>
+        </mat-card>
+      </mat-expansion-panel>
+    </mat-card-content>
+  </mat-card>
+</mat-tab>
+
+
+  <mat-tab label="حذف / تغییر نام">
+  <form class="spacer filter-container" #deleteForm="ngForm">
+    <mat-form-field hideRequiredMarker>
+      <mat-label>دامنه</mat-label>
+      <mat-select required name="domainId" [(ngModel)]="domainId" disableOptionCentering>
+        <mat-option>--</mat-option>
+        <mat-option *ngFor="let domain of onlyValues(list); trackBy: trackByFnId;" [value]="domain.id">
+          {{domain.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div *ngFor="let user of onlyValuesByParent(userList, domainId); trackBy: trackByFnId;">
+      <mat-form-field hideRequiredMarker>
+        <mat-label>نام کاربری</mat-label>
+        <input matInput name="user name" required [ngModel]="user.name" [name]="'user::' + user.id">
+      </mat-form-field>
+      <button mat-button color="accent" class="but-spacer-left"
+              [disabled]="checkDirty(deleteForm.controls['user::' + user.id])"
+              (click)="openBottomSheet(user.id, deleteForm.controls['user::' + user.id].value, user.name, 'rename')">
+        به‌روزرسانی
+      </button>
+      <button *ngIf="user.enabled" mat-raised-button color="accent"
+              class="but-spacer-left switch-button"
+              (click)="switchUser(user)">
+        غیرفعال کردن
+      </button>
+      <button *ngIf="!user.enabled" mat-raised-button color="primary"
+              class="but-spacer-left switch-button"
+              (click)="switchUser(user)">
+        فعال کردن
+      </button>
+      <button mat-raised-button color="warn" class="but-spacer-left"
+              (click)="openBottomSheet(user.id, deleteForm.controls['user::' + user.id].value, user.name, 'delete')">
+        حذف
+      </button>
+    </div>
+  </form>
+</mat-tab>
+
+</mat-tab-group>
