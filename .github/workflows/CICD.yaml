@@ -1,0 +1,127 @@
+name: CI Build
+
+on:
+  push:
+    branches:
+      - development
+      - production
+
+env:
+  CUSTOMPBX_SERVICE_IMAGE: custompbx-service-image
+
+
+
+jobs:
+
+################### start custompbx-service ################################################
+  build-custompbx-service:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t "erfanmazraei/dastyartech:${{ github.ref == 'refs/heads/development' && 'development' || 'production' }}-$CUSTOMPBX_SERVICE_IMAGE-${{ github.sha }}" -f docker/Dockerfile .
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Publish Docker image
+        run: |
+          docker push "erfanmazraei/dastyartech:${{ github.ref == 'refs/heads/development' && 'development' || 'production' }}-$CUSTOMPBX_SERVICE_IMAGE-${{ github.sha }}"
+
+  tag-on-argocd-custompbx-service:
+    name: tag-on-argocd-custompbx-service
+    runs-on: ubuntu-latest
+    needs:
+      - build-custompbx-service
+    steps:
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Checkout Argocd Repository
+        run: |
+          rm -rf argocd-repo-production-custompbx-service && rm -rf argocd-repo-development-custompbx-service
+          if [ "${{ github.ref }}" == "refs/heads/production" ]; then
+            git clone git@github.com:erfanmazmaz/kuber-deploy-production.git argocd-repo-production-custompbx-service
+          else
+            git clone git@github.com:erfanmazmaz/kuber-deploy-development.git argocd-repo-development-custompbx-service
+          fi
+
+      - name: Set Image Tag
+        run: |
+          CUSTOMPBX_SERVICE_IMAGE_TAG="erfanmazraei/dastyartech:${{ github.ref == 'refs/heads/production' && 'production' || 'development' }}-$CUSTOMPBX_SERVICE_IMAGE-${GITHUB_SHA}"
+          sed -i "s|image: erfanmazraei/dastyartech:${{ github.ref == 'refs/heads/production' && 'production' || 'development' }}-custompbx-service-image-[a-z0-9]*|image: ${CUSTOMPBX_SERVICE_IMAGE_TAG}|" argocd-repo-${{ github.ref == 'refs/heads/production' && 'production' || 'development' }}-custompbx-service/custompbx-service/custompbx-service-deployment.yaml
+
+      - name: Commit Changes to Argocd Repo
+        run: |
+          cd argocd-repo-${{ github.ref == 'refs/heads/production' && 'production' || 'development' }}-custompbx-service/custompbx-service/
+          git config --local user.email "erfanmazraei@gmail.com"
+          git config --local user.name "erfanmazraei"
+          git add custompbx-service-deployment.yaml
+          git commit -m "Update image tag to :  ${GITHUB_SHA} "
+          git push origin main
+
+  notifyTelegram-custompbx-service:
+    runs-on: ubuntu-latest
+    needs:
+      - build-custompbx-service
+      - tag-on-argocd-custompbx-service
+    if: always()
+    steps:
+      - name: Send failure message for build-custompbx-service
+        if: needs.build-custompbx-service.result == 'failure'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+
+          message: |
+            Repository: ${{ github.event.repository.name }}
+            Branch: ${{ github.ref }}
+            User: ${{ github.actor }}
+            Commit Name: ${{ github.event.head_commit.message }}
+            Commit Link: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+            ops: ***build-custompbx-service** has failed🚨.
+
+      - name: Send failure message for tag-on-argocd-custompbx-service
+        if: needs.tag-on-argocd-custompbx-service.result == 'failure'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+
+          message: |
+            Repository: ${{ github.event.repository.name }}
+            Branch: ${{ github.ref }}
+            User: ${{ github.actor }}
+            Commit Name: ${{ github.event.head_commit.message }}
+            Commit Link: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+            ops: ***tag-on-argocd-custompbx-service** has failed🚨.
+
+      - name: Send success message
+        if: needs.build-custompbx-service.result == 'success' && needs.tag-on-argocd-custompbx-service.result == 'success'
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+
+          message: |
+            Repository: ${{ github.event.repository.name }}
+            Branch: ${{ github.ref }}
+            User: ${{ github.actor }}
+            Commit Name: ${{ github.event.head_commit.message }}
+            Commit Link: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
+            wow: ***All jobs custompbx-service have completed successfully✅***
+
+
+################### end custompbx-service ################################################

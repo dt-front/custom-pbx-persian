@@ -1,0 +1,26 @@
+name: Notifier
+
+on:
+  push:
+    branches: 
+      - '*'  # Triggers on push to any branch
+  pull_request:  # Triggers on pull request events
+    types: [opened, synchronize, reopened]
+
+jobs:
+  notifyTelegram:
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/development' && github.ref != 'refs/heads/production'
+    steps:
+      - name: Send custom message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            The ${{ github.event_name }} event triggered from notifier workflow.
+            Repository: ${{ github.event.repository.name }}
+            Branch: ${{ github.ref }}
+            User: ${{ github.actor }}
+            Commit Name: ${{ github.event.head_commit.message }}
+            Commit Link: https://github.com/${{ github.repository }}/commit/${{ github.sha }}
