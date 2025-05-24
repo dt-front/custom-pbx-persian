@@ -1,17 +1,27 @@
-<mat-toolbar color="primary" >
+<mat-toolbar color="primary">
   <span class="example-spacer"></span>
+  
+  <!-- دکمه نمایش/مخفی‌سازی گفت‌وگوها -->
   <button mat-icon-button (click)="showHideConversations()">
     <mat-icon>question_answer</mat-icon>
   </button>
+
+  <!-- دکمه نمایش/مخفی‌سازی تلفن -->
   <button mat-icon-button (click)="showHidePhone()">
     <mat-icon>phone</mat-icon>
   </button>
+
+  <!-- دکمه کلون کامپوننت -->
   <button mat-icon-button (click)="cloneComponent()">
     <mat-icon>filter_2</mat-icon>
   </button>
+
+  <!-- تنظیمات (فقط برای مدیر) -->
   <button *ngIf="user?.group_id === 1" mat-icon-button [routerLink]="['/settings']">
     <mat-icon>settings</mat-icon>
   </button>
+
+  <!-- نمایه کاربر -->
   <label class="flex-v-center">
     <button mat-icon-button [matMenuTriggerFor]="menu">
       <mat-icon *ngIf="!user.avatar_format">face</mat-icon>
@@ -20,23 +30,28 @@
     </button>
     <span class="user-name">{{user.login}}</span>
   </label>
+
+  <!-- منوی کاربر -->
   <mat-menu #menu="matMenu">
     <button mat-menu-item>
       <mat-icon>account_circle</mat-icon>
-      <span>Profile</span>
+      <span>پروفایل</span>
     </button>
     <button *ngIf="user?.group_id === 1" mat-menu-item [routerLink]="['/settings']">
       <mat-icon>settings</mat-icon>
-      <span>Settings</span>
+      <span>تنظیمات</span>
     </button>
     <button mat-menu-item (click)="logOut()">
       <mat-icon>keyboard_tab</mat-icon>
-      <span>Log out</span>
+      <span>خروج</span>
     </button>
   </mat-menu>
 </mat-toolbar>
+
+<!-- بخش تلفن -->
 <div [hidden]="hidePhone">
   <app-lazy-wrapper *ngIf="startPhone" type="phone"></app-lazy-wrapper>
 </div>
 
+<!-- بارگذاری داینامیک کامپوننت -->
 <ng-container #componentContainer></ng-container>

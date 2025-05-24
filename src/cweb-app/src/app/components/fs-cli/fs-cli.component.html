@@ -5,7 +5,7 @@
 <div>
   <div class="filter-container">
     <mat-form-field hideRequiredMarker>
-        <mat-label>Value</mat-label>
+        <mat-label>مقدار</mat-label>
         <input matInput name="value" [(ngModel)]="command"
              appResizeInput
              [resizeOnString]="command" required
@@ -14,7 +14,7 @@
     </mat-form-field>
     <button mat-raised-button color="basic" class="but-spacer-left switch-button" [disabled]="!command"
             (click)="runCommand()">
-      Run Command
+      اجرای دستور
     </button>
   </div>
   <div class="term-field" *ngIf="list.fscliData">

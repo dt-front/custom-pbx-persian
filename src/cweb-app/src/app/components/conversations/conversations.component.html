@@ -2,7 +2,7 @@
   <mat-sidenav mode="side" opened [fixedInViewport]="true" [fixedTopGap]="fixedTopGapScrolled" class="contact-list">
     <div class="users-nav-list">
       <mat-form-field style="padding-top: 7px">
-        <mat-label>User name</mat-label>
+        <mat-label>نام کاربر</mat-label>
         <input matInput [(ngModel)]="searchUser">
       </mat-form-field>
       @for (webUser of getLogins(searchUser); track webUser.id) {
@@ -20,21 +20,23 @@
       }
     </div>
   </mat-sidenav>
-  <mat-sidenav-content style="margin-left: 237px"> <!-- sidenav do not pushing content on opened on start-->
+  
+  <mat-sidenav-content style="margin-left: 237px">
     @if (userList[currentChat]) {
       <mat-progress-bar mode="indeterminate" *ngIf="loadCounter > 0"></mat-progress-bar>
       <mat-toolbar>
-        <span>{{ 'Conversation with ' + userList[currentChat].login }}</span>
+        <span>{{ 'گفتگو با ' + userList[currentChat].login }}</span>
         @if (userList[currentChat].sip_id?.Valid) {
-          <button mat-icon-button color="primary" aria-label="Example icon button with a menu icon"
+          <button mat-icon-button color="primary" aria-label="شروع تماس صوتی"
                   [disabled]="!user?.sip_id?.Valid" (click)="voiceCall()">
             <mat-icon>keyboard_voice</mat-icon>
           </button>
         }
       </mat-toolbar>
     } @else {
-      <app-inner-header name="Conversations" [loadCounter]="loadCounter"></app-inner-header>
+      <app-inner-header name="گفت‌وگوها" [loadCounter]="loadCounter"></app-inner-header>
     }
+
     @if (!currentChat) {
       <div class="msg-placeholder">
         <mat-icon class="centered-child">question_answer</mat-icon>
@@ -56,7 +58,7 @@
                     [color]="inConversationsCall ? 'warn' : inCall ? '' : 'green'"
                     [disabled]="(inCall && !inConversationsCall) || (isInbound && !isRinging)"
                     (click)="connectToUser()"
-                    aria-label="icon button">
+                    aria-label="تماس">
               <mat-icon>phone</mat-icon>
             </button>
             @if (isInbound) {
@@ -64,11 +66,11 @@
                       color="warn"
                       [disabled]="!isRinging && !inCall"
                       (click)="hangup()"
-                      aria-label="icon button">
+                      aria-label="قطع تماس">
                 <mat-icon>phone_disabled</mat-icon>
               </button>
             }
-            <button class="margin-fab" mat-fab color="basic" aria-label="icon button" (click)="backToChat()">
+            <button class="margin-fab" mat-fab color="basic" aria-label="بازگشت به چت" (click)="backToChat()">
               <mat-icon>chat</mat-icon>
             </button>
           </div>
@@ -85,9 +87,9 @@
                 @if (message.duration === 0 || message.duration) {
                   <div style="display: flex;align-items: center;">
                     @if (message.receiver_id.id == user.id) {
-                      <span>Incoming call</span>
+                      <span>تماس ورودی</span>
                     } @else {
-                      <span>Outgoing call</span>
+                      <span>تماس خروجی</span>
                     }
                     <mat-icon>phone</mat-icon>
                   </div>
@@ -102,11 +104,11 @@
         </div>
         <div class="msg-input">
           <mat-form-field class="msg-input-form">
-            <mat-label>Text</mat-label>
+            <mat-label>پیام</mat-label>
             <input matInput [(ngModel)]="newMsg" (keydown.enter)="sendMsg()">
             <mat-icon matSuffix color="primary" class="send-btn" (click)="sendMsg()">send</mat-icon>
-          </mat-form-field>
-        </div>
+          </mat-icon>
+        </mat-form-field>
       </div>
     }
   </mat-sidenav-content>

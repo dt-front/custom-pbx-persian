@@ -1,46 +1,45 @@
-<app-inner-header name="Global Variables" [loadCounter]="loadCounter"></app-inner-header>
+<app-inner-header name="متغیرهای سراسری" [loadCounter]="loadCounter"></app-inner-header>
+
 <mat-card *ngIf="list && ObjLength(list) == 0">
   <mat-card-content>
-    No global variables set in database you can import them from freeswitch instance
+    هیچ متغیر سراسری‌ای در پایگاه داده تنظیم نشده است. می‌توانید آن‌ها را از نمونه Freeswitch وارد کنید.
     <button mat-raised-button color="basic" class="but-spacer-left switch-button"
             (click)="ImportGlobalVariables()">
-      Import
+      وارد کردن
     </button>
   </mat-card-content>
 </mat-card>
 
 <mat-card *ngIf="list">
   <mat-card-content>
-    <h3>
-      ⚠ Local vars.xml will be overwritten.
-    </h3>
+    <h3>⚠ فایل vars.xml محلی بازنویسی خواهد شد.</h3>
     <form #details="ngForm">
-      <h3>Global Variables:</h3>
-      <div *ngIf="list" cdkDropList
-           (cdkDropListDropped)="dropAction($event, onlySortedValues(list))">
+      <h3>متغیرهای سراسری:</h3>
+      <div *ngIf="list" cdkDropList (cdkDropListDropped)="dropAction($event, onlySortedValues(list))">
         <div class="spacer" *ngFor="let variable of onlySortedValues(list); trackBy: trackByIdFn" cdkDrag>
           <div *ngIf="variable.id && !isArray(variable)">
             <mat-icon class="dragHandler" cdkDragHandle>unfold_more</mat-icon>
+            
             <mat-form-field hideRequiredMarker>
-              <mat-label>Name</mat-label>
+              <mat-label>نام</mat-label>
               <input matInput name="name" [(ngModel)]="variable.name" required
                      [disabled]="!variable.enabled || variable.dynamic"
                      [name]="'variableName' + variable.id"
                      appResizeInput
-                     [resizeOnString]="variable.name"
-              >
+                     [resizeOnString]="variable.name">
             </mat-form-field>
+
             <mat-form-field hideRequiredMarker>
-              <mat-label>Value</mat-label>
+              <mat-label>مقدار</mat-label>
               <input matInput name="value" [(ngModel)]="variable.value" required
                      [disabled]="!variable.enabled || variable.dynamic"
                      [name]="'variableValue' + variable.id"
                      appResizeInput
-                     [resizeOnString]="variable.value"
-              >
+                     [resizeOnString]="variable.value">
             </mat-form-field>
+
             <mat-form-field hideRequiredMarker class="var-type">
-              <mat-label>Type</mat-label>
+              <mat-label>نوع</mat-label>
               <mat-select [(ngModel)]="variable.type"
                           [disabled]="!variable.enabled || variable.dynamic"
                           [name]="'variableType' + variable.id"
@@ -50,46 +49,54 @@
                 </mat-option>
               </mat-select>
             </mat-form-field>
+
             <button mat-button color="accent" class="but-spacer-left"
                     [disabled]="!isReadyToSendThree(details.controls['variableName' + variable.id], details.controls['variableValue' + variable.id], details.controls['variableType' + variable.id]) || variable.dynamic"
                     (click)="updateGlobalVariable(variable)">
-              Update
+              به‌روزرسانی
             </button>
+
             <button *ngIf="variable.enabled" mat-raised-button color="accent"
                     [disabled]="variable.dynamic"
                     class="but-spacer-left switch-button" (click)="switchGlobalVariable(variable)">
-              Disable
+              غیرفعال‌سازی
             </button>
+
             <button *ngIf="!variable.enabled" mat-raised-button color="primary"
                     [disabled]="variable.dynamic"
                     class="but-spacer-left switch-button" (click)="switchGlobalVariable(variable)">
-              Enable
+              فعال‌سازی
             </button>
-            <button mat-raised-button color="warn" class="but-spacer-left" (click)="deleteGlobalVariable(variable)"
+
+            <button mat-raised-button color="warn" class="but-spacer-left"
+                    (click)="deleteGlobalVariable(variable)"
                     [disabled]="variable.dynamic">
-              Delete
+              حذف
             </button>
           </div>
         </div>
+
         <div *ngIf="list">
           <div class="spacer" *ngFor="let variable of newList; let i = index">
             <div *ngIf="variable" class="spacer">
               <mat-form-field hideRequiredMarker>
-                <mat-label>Name</mat-label>
-                <input matInput name="name" [(ngModel)]="variable.name" required [name]="'newName' + i"
+                <mat-label>نام</mat-label>
+                <input matInput name="name" [(ngModel)]="variable.name" required
+                       [name]="'newName' + i"
                        appResizeInput
-                       [resizeOnString]="variable.name"
-                >
+                       [resizeOnString]="variable.name">
               </mat-form-field>
+
               <mat-form-field hideRequiredMarker>
-                <mat-label>Value</mat-label>
-                <input matInput name="value" [(ngModel)]="variable.value" required [name]="'newValue' + i"
+                <mat-label>مقدار</mat-label>
+                <input matInput name="value" [(ngModel)]="variable.value" required
+                       [name]="'newValue' + i"
                        appResizeInput
-                       [resizeOnString]="variable.value"
-                >
+                       [resizeOnString]="variable.value">
               </mat-form-field>
+
               <mat-form-field hideRequiredMarker class="var-type">
-                <mat-label>Type</mat-label>
+                <mat-label>نوع</mat-label>
                 <mat-select [(ngModel)]="variable.type"
                             [name]="'newType' + i"
                             disableOptionCentering>
@@ -98,23 +105,23 @@
                   </mat-option>
                 </mat-select>
               </mat-form-field>
+
               <button mat-button color="accent" class="but-spacer-left"
                       [disabled]="!isReadyToSendThree(details.controls['newValue' + i], details.controls['newName' + i], details.controls['newNodeDomain' + i])"
                       (click)="newGlobalVariable(i, details.controls['newName' + i].value, details.controls['newValue' + i].value, details.controls['newType' + i].value)">
-                Update
+                افزودن
               </button>
+
               <button mat-button color="warn" (click)="dropNewGlobalVariable(i)" class="but-spacer-left">
-                Delete
+                حذف
               </button>
             </div>
           </div>
         </div>
       </div>
       <button mat-raised-button color="accent" class="spacer" (click)="addNewGlobalVariable()">
-        Add
+        افزودن متغیر جدید
       </button>
     </form>
   </mat-card-content>
 </mat-card>
-
-

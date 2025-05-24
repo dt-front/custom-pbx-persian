@@ -1,30 +1,29 @@
-<app-inner-header name="Opal" [loadCounter]="loadCounter"></app-inner-header>
+<app-inner-header name="اوپال" [loadCounter]="loadCounter"></app-inner-header>
 <app-module-not-exists-banner [list]="list"></app-module-not-exists-banner>
- <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" [(selectedIndex)]="selectedIndex"
+<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start" [(selectedIndex)]="selectedIndex"
                *ngIf="list && list.exists !== false">
-  <mat-tab label="List">
+  <mat-tab label="لیست">
     <mat-card>
       <mat-card-header>
-        <mat-card-subtitle>Settings</mat-card-subtitle>
+        <mat-card-subtitle>تنظیمات</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
         <mat-expansion-panel>
           <mat-expansion-panel-header>
             <mat-panel-title>
-              Settings
+              تنظیمات
             </mat-panel-title>
             <mat-panel-description>
-              Click to get details
+              کلیک کنید برای مشاهده جزئیات
             </mat-panel-description>
           </mat-expansion-panel-header>
-          <h3>Params:</h3>
+          <h3>پارامترها:</h3>
           <app-key-value-pad-2 [exist]="list.settings"
                                [items]="list.settings"
                                [newItems]="list.settings?.new"
                                [id]="null"
                                [toCopy]="null"
-                               [dispatchersCallbacks]="globalSettingsDispatchers"
-          >
+                               [dispatchersCallbacks]="globalSettingsDispatchers">
           </app-key-value-pad-2>
         </mat-expansion-panel>
       </mat-card-content>
@@ -32,7 +31,7 @@
 
     <mat-card>
       <mat-card-header>
-        <mat-card-subtitle>Listeners</mat-card-subtitle>
+        <mat-card-subtitle>لیسنرها</mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
         <div *ngFor="let item of onlyValues(list.listeners); trackBy: trackByFn" class="panel-wrapper">
@@ -43,21 +42,20 @@
                 {{item.name}}
               </mat-panel-title>
               <mat-panel-description>
-                Click to get details
+                کلیک کنید برای مشاهده جزئیات
               </mat-panel-description>
             </mat-expansion-panel-header>
             <button mat-raised-button color="basic" (click)="copyListener(item.id)"
-                    *ngIf="list.listeners[item.id] && (list.listeners[item.id].parameters)">Copy
+                    *ngIf="list.listeners[item.id] && (list.listeners[item.id].parameters)">کپی
             </button>
-            <h3>Params:</h3>
+            <h3>پارامترها:</h3>
             <div>
               <app-key-value-pad-2 [exist]="item.parameters"
                                    [items]="item.parameters"
                                    [newItems]="item.parameters?.new"
                                    [id]="item.id"
                                    [toCopy]="toCopyListener"
-                                   [dispatchersCallbacks]="listenerSettingsDispatchers"
-              >
+                                   [dispatchersCallbacks]="listenerSettingsDispatchers">
               </app-key-value-pad-2>
             </div>
           </mat-expansion-panel>
@@ -66,35 +64,34 @@
     </mat-card>
   </mat-tab>
 
-  <mat-tab label="Add">
+  <mat-tab label="افزودن">
     <form class="spacer spacerb" (ngSubmit)="onListenerSubmit()">
       <mat-form-field hideRequiredMarker>
-        <mat-label>Name</mat-label>
-        <input matInput placeholder="New listener name" required name="name" [(ngModel)]="newListenerName">
+        <mat-label>نام</mat-label>
+        <input matInput placeholder="نام لیسنر جدید" required name="name" [(ngModel)]="newListenerName">
       </mat-form-field>
-      <button mat-raised-button color="primary" type="submit">Submit</button>
+      <button mat-raised-button color="primary" type="submit">ثبت</button>
     </form>
   </mat-tab>
 
-  <mat-tab label="Delete/Rename">
+  <mat-tab label="حذف/تغییر نام">
     <form class="spacer spacerb" #deleteForm="ngForm">
-      <h3>Listeners:</h3>
+      <h3>لیسنرها:</h3>
       <div *ngFor="let listener of onlyValues(list.listeners); trackBy: trackByFn">
         <mat-form-field hideRequiredMarker>
-        <mat-label>Listener name</mat-label>
-        <input matInput name="Listener name" required [ngModel]="listener.name"
+          <mat-label>نام لیسنر</mat-label>
+          <input matInput name="Listener name" required [ngModel]="listener.name"
                  [name]="'listener::' + listener.id">
         </mat-form-field>
         <button mat-button color="accent" [disabled]="checkDirty(deleteForm.controls['listener::' + listener.id])"
                 (click)="openBottomSheetListener(listener.id, deleteForm.controls['listener::' + listener.id].value, listener.name, 'rename')">
-          Update
+          بروزرسانی
         </button>
         <button mat-raised-button color="warn"
                 (click)="openBottomSheetListener(listener.id, deleteForm.controls['listener::' + listener.id].value, listener.name, 'delete')">
-          Delete
+          حذف
         </button>
       </div>
     </form>
   </mat-tab>
 </mat-tab-group>
-
