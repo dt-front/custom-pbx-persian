@@ -1,3 +1,9 @@
+
+<ul>
+  <li *ngFor="let item of routes">
+<a [href]="'http://localhost:3000/cweb/'+item.path" target="_blank">{{item.path}}</a>
+  </li>
+</ul>
 <div class="center">
   <div class="second">
     <img class="logo-big" src="./assets/img/logo-big.png" alt="لوگو">

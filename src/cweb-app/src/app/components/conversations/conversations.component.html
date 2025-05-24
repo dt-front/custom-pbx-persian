@@ -20,7 +20,7 @@
       }
     </div>
   </mat-sidenav>
-  
+
   <mat-sidenav-content style="margin-left: 237px">
     @if (userList[currentChat]) {
       <mat-progress-bar mode="indeterminate" *ngIf="loadCounter > 0"></mat-progress-bar>
@@ -107,8 +107,8 @@
             <mat-label>پیام</mat-label>
             <input matInput [(ngModel)]="newMsg" (keydown.enter)="sendMsg()">
             <mat-icon matSuffix color="primary" class="send-btn" (click)="sendMsg()">send</mat-icon>
-          </mat-icon>
-        </mat-form-field>
+          </mat-form-field>
+        </div>
       </div>
     }
   </mat-sidenav-content>
