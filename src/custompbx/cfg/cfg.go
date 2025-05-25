@@ -119,10 +119,10 @@ func createConfig() GeneralCfg {
 	hostname, _ := os.Hostname()
 	var item GeneralCfg
 	item.Fs.Switchname = hostname
-	item.Db.Host = "127.0.0.1"
-	item.Db.Name = "custompbx"
-	item.Db.User = "custompbx"
-	item.Db.Pass = "custompbx"
+	item.Db.Host = "development-postgres-postgresql-cp-development-rw"
+	item.Db.Name = "development-cp"
+	item.Db.User = "development-cp"
+	item.Db.Pass = "DAMQJ7GJ7UQKOTR4gQT6wFRsvDwJKm4r8VSj3C5tjDXxXAwODTLts1jgzEum5FAC"
 	item.Db.Port = 5432
 	item.Fs.HEPCollector.Host = "127.0.0.1"
 	item.Fs.HEPCollector.Port = 9060
