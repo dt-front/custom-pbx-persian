@@ -32,10 +32,10 @@
     "secure": true
   },
   "database": {
-    "name": "custompbx",
-    "host": "postgres-host",
+    "name": "development-cp",
+    "host": "development-postgres-postgresql-cp-development-rw",
     "port": 5432,
-    "user": "custompbx",
-    "pass": "custompbx"
+    "user": "development-cp",
+    "pass": "DAMQJ7GJ7UQKOTR4gQT6wFRsvDwJKm4r8VSj3C5tjDXxXAwODTLts1jgzEum5FAC"
   }
 }
