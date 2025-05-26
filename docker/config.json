@@ -18,18 +18,18 @@
     "host": "0.0.0.0",
     "port": 8080,
     "stun_port": 3478,
-    "cert_path": "/etc/freeswitch/tls/wss-cert.pem",
-    "key_path": "/etc/freeswitch/tls/wss-key.pem",
-    "secure": true
+    "cert_path": "",
+    "key_path": "",
+    "secure": false
   },
   "xml_curl_server": {
     "route": "/conf/config",
     "host": "0.0.0.0",
     "port": 8081,
     "stun_port": 0,
-    "cert_path": "/etc/freeswitch/tls/wss-cert.pem",
-    "key_path": "/etc/freeswitch/tls/wss-key.pem",
-    "secure": true
+    "cert_path": "",
+    "key_path": "",
+    "secure": false
   },
   "database": {
     "name": "development-cp",
