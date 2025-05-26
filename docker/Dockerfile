@@ -48,6 +48,14 @@ RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o cpbx .
 FROM alpine:latest
 WORKDIR /app
 
+RUN mkdir -p /etc/freeswitch/tls
+
+COPY certificates/wss-cert.pem /etc/freeswitch/tls/
+COPY certificates/wss-key.pem /etc/freeswitch/tls/
+
+RUN chmod 644 /etc/freeswitch/tls/wss-cert.pem
+RUN chmod 600 /etc/freeswitch/tls/wss-key.pem
+
 # Copy Golang backend from previous stage
 COPY --from=backend /app/cpbx /app/cpbx
 
